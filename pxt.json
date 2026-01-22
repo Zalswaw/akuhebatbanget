@@ -11,7 +11,8 @@
         "main.ts",
         "blynk.ts",
         "sntp.ts",
-        "telegram.ts"
+        "telegram.ts",
+        "firebase.ts"
     ],
     "testFiles": [
         "test.ts"
