@@ -1,70 +1,68 @@
-let firebaseHost = ""
-let firebaseAuth = ""
+let serverHost = ""
 
 namespace esp8266 {
 
-    let firebaseUploadSuccess = false
+    let uploadSuccess = false
 
-    //% subcategory="Firebase"
-    //% block="Set Firebase Host %host"
-    export function setFirebaseHost(host: string) {
+    //============================
+    // SET SERVER IP / DOMAIN
+    //============================
 
-        // Hapus https:// dan /
-        firebaseHost = host
-            .replace("https://", "")
+    //% subcategory="Server"
+    //% block="Set Server Host %host"
+    export function setServerHost(host: string) {
+        serverHost = host
             .replace("http://", "")
+            .replace("https://", "")
             .replace("/", "")
     }
 
-    //% subcategory="Firebase"
-    //% block="Set Firebase Token %token"
-    export function setFirebaseToken(token: string) {
-        firebaseAuth = token
+    //============================
+    // STATUS
+    //============================
+
+    //% subcategory="Server"
+    //% block="Upload success"
+    export function isUploadSuccess(): boolean {
+        return uploadSuccess
     }
 
-    //% subcategory="Firebase"
-    //% block="Firebase upload success"
-    export function isFirebaseUploadSuccess(): boolean {
-        return firebaseUploadSuccess
-    }
+    //============================
+    // SEND DATA TO PHP SERVER
+    //============================
 
-    //% subcategory="Firebase"
-    //% block="Send to Firebase Path %path Data %data"
-    export function sendToFirebase(path: string, data: string) {
+    //% subcategory="Server"
+    //% block="Send to Server Path %path Data %data"
+    export function sendToServer(path: string, data: string) {
 
-        firebaseUploadSuccess = false
+        uploadSuccess = false
 
         // Cek WiFi
         if (!isWifiConnected()) return
 
-        // Cek Host
-        if (firebaseHost == "") return
+        // Cek Server
+        if (serverHost == "") return
 
 
-        // Connect SSL
+        // Connect HTTP (PORT 80)
         if (!sendCommand(
-            "AT+CIPSTART=\"SSL\",\"" + firebaseHost + "\",443",
+            "AT+CIPSTART=\"TCP\",\"" + serverHost + "\",80",
             "OK",
-            10000
+            5000
         )) return
 
 
-        let body = data
+        // Encode data (biar aman di URL)
+        let safeData = formatUrl(data)
 
-        // Request
-        let request = "PUT /" + path + ".json"
+        // URL ke PHP
+        let url = "/iot.php?path=" + path + "&data=" + safeData
 
-        if (firebaseAuth != "") {
-            request += "?auth=" + firebaseAuth
-        }
 
-        request += " HTTP/1.1\r\n"
-
-        request += "Host: " + firebaseHost + "\r\n"
-        request += "Content-Type: application/json\r\n"
-        request += "Connection: close\r\n"
-        request += "Content-Length: " + body.length + "\r\n\r\n"
-        request += body
+        // HTTP GET
+        let request = "GET " + url + " HTTP/1.1\r\n"
+        request += "Host: " + serverHost + "\r\n"
+        request += "Connection: close\r\n\r\n"
 
 
         // Send
@@ -78,14 +76,16 @@ namespace esp8266 {
             return
         }
 
-        // Cek respon Firebase
+
+        // Cek respon server
         if (getResponse("200 OK", 5000) == "") {
             sendCommand("AT+CIPCLOSE", "OK", 1000)
             return
         }
 
+
         sendCommand("AT+CIPCLOSE", "OK", 1000)
 
-        firebaseUploadSuccess = true
+        uploadSuccess = true
     }
 }
