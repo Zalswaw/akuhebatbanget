@@ -56,7 +56,8 @@ namespace esp8266 {
         let safeData = formatUrl(data)
 
         // URL ke PHP
-        let url = "/iot.php?path=" + path + "&data=" + safeData
+        let url = "/esp_project/iot.php?path=" + path + "&data=" + safeData
+
 
 
         // HTTP GET
