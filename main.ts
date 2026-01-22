@@ -6,7 +6,7 @@
 /**
  * Blocks for ESP8266 WiFi module.
  */
-//% weight=10 color=#0BACF7 icon="\uf1eb" block="ESP8266 rzl"
+//% weight=10 color=#0BACF7 icon="\uf1eb" block="ESP8266 IDN"
 namespace esp8266 {
     // Flag to indicate whether the ESP8266 was initialized successfully.
     let esp8266Initialized = false
