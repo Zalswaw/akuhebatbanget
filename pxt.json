@@ -10,8 +10,7 @@
         "README.md",
         "main.ts",
         "sntp.ts",
-        "firebase.ts",
-        "Spreadsheet.ts"
+        "firebase.ts"
     ],
     "testFiles": [
         "test.ts"
