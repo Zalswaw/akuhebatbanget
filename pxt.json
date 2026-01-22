@@ -9,9 +9,7 @@
     "files": [
         "README.md",
         "main.ts",
-        "blynk.ts",
         "sntp.ts",
-        "telegram.ts",
         "firebase.ts"
     ],
     "testFiles": [
