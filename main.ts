@@ -1,15 +1,12 @@
 /*******************************************************************************
  * MakeCode extension for ESP8266 Wifi module.
  *
- * Company: Cytron Technologies Sdn Bhd
- * Website: http://www.cytron.io
- * Email:   support@cytron.io
  *******************************************************************************/
 
 /**
  * Blocks for ESP8266 WiFi module.
  */
-//% weight=10 color=#ff8000 icon="\uf1eb" block="ESP8266 WiFi"
+//% weight=10 color=#0BACF7 icon="\uf1eb" block="ESP8266 rzl"
 namespace esp8266 {
     // Flag to indicate whether the ESP8266 was initialized successfully.
     let esp8266Initialized = false
