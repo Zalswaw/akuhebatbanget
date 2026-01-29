@@ -1,16 +1,18 @@
 let serverHost = ""
+let serverPath = "/iot.php"
 
 namespace esp8266 {
 
     let uploadSuccess = false
 
     //============================
-    // SET SERVER IP / DOMAIN
+    // SET SERVER HOST / DOMAIN
     //============================
 
     //% subcategory="Server"
     //% block="Set Server Host %host"
     export function setServerHost(host: string) {
+
         serverHost = host
             .replace("http://", "")
             .replace("https://", "")
@@ -18,7 +20,22 @@ namespace esp8266 {
     }
 
     //============================
-    // STATUS
+    // SET SERVER PATH (PHP FILE)
+    //============================
+
+    //% subcategory="Server"
+    //% block="Set Server Path %path"
+    export function setServerPath(path: string) {
+
+        if (!path.startsWith("/")) {
+            path = "/" + path
+        }
+
+        serverPath = path
+    }
+
+    //============================
+    // STATUS UPLOAD
     //============================
 
     //% subcategory="Server"
@@ -28,7 +45,7 @@ namespace esp8266 {
     }
 
     //============================
-    // SEND DATA TO PHP SERVER
+    // SEND DATA TO SERVER
     //============================
 
     //% subcategory="Server"
@@ -37,14 +54,14 @@ namespace esp8266 {
 
         uploadSuccess = false
 
-        // Cek WiFi
+        // Check WiFi
         if (!isWifiConnected()) return
 
-        // Cek Server
+        // Check Host
         if (serverHost == "") return
 
 
-        // Connect HTTP (PORT 80)
+        // Connect TCP (HTTP PORT 80)
         if (!sendCommand(
             "AT+CIPSTART=\"TCP\",\"" + serverHost + "\",80",
             "OK",
@@ -52,41 +69,43 @@ namespace esp8266 {
         )) return
 
 
-        // Encode data (biar aman di URL)
+        // Encode data
         let safeData = formatUrl(data)
 
-        // URL ke PHP
-        let url = "/esp_project/iot.php?path=" + path + "&data=" + safeData
+        // Build URL
+        let url = serverPath + "?path=" + path + "&data=" + safeData
 
 
-
-        // HTTP GET
+        // HTTP GET Request
         let request = "GET " + url + " HTTP/1.1\r\n"
         request += "Host: " + serverHost + "\r\n"
         request += "Connection: close\r\n\r\n"
 
 
-        // Send
+        // Send Length
         sendCommand("AT+CIPSEND=" + request.length)
+
+        // Send Request
         sendCommand(request)
 
 
-        // Cek kirim
+        // Check Send OK
         if (getResponse("SEND OK", 3000) == "") {
             sendCommand("AT+CIPCLOSE", "OK", 1000)
             return
         }
 
 
-        // Cek respon server
+        // Check HTTP 200
         if (getResponse("200 OK", 5000) == "") {
             sendCommand("AT+CIPCLOSE", "OK", 1000)
             return
         }
 
 
+        // Close Connection
         sendCommand("AT+CIPCLOSE", "OK", 1000)
 
         uploadSuccess = true
     }
-} 
+}
